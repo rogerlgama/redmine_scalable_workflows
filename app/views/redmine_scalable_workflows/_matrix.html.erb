@@ -1,0 +1,59 @@
+<div class="rsw-split-matrix">
+  <div class="rsw-origin-pane">
+    <div class="rsw-status-row rsw-origin-heading" aria-hidden="true">&nbsp;</div>
+    <% @rsw_sources.each_with_index do |source, source_index| %>
+      <% source_id = source[:id].to_i %>
+      <div class="rsw-origin-row <%= source_index.odd? ? 'rsw-even-row' : 'rsw-odd-row' %>"
+           title="<%= source[:name] %>">
+        <% unless source_id.zero? && rule != 'always' %>
+          <button type="button" class="rsw-bulk-toggle"
+                  data-direction="source" data-status-id="<%= source_id %>" data-rule="<%= rule %>"
+                  title="<%= l(:rsw_toggle_source_transitions) %>"
+                  aria-label="<%= l(:rsw_toggle_source_transitions) %>">✓</button>
+        <% end %>
+        <span class="rsw-origin-name"><%= source[:name] %></span>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="rsw-destination-pane">
+    <div class="rsw-destination-grid" style="--rsw-column-count: <%= @rsw_destinations.size %>">
+      <div class="rsw-status-row rsw-destination-statuses">
+        <% @rsw_destinations.each do |destination| %>
+          <div class="rsw-status-cell">
+            <button type="button" class="rsw-bulk-toggle"
+                    data-direction="destination" data-status-id="<%= destination[:id] %>" data-rule="<%= rule %>"
+                    title="<%= l(:rsw_toggle_destination_transitions) %>"
+                    aria-label="<%= l(:rsw_toggle_destination_transitions) %>">✓</button>
+            <span><%= destination[:name] %></span>
+          </div>
+        <% end %>
+      </div>
+
+      <% @rsw_sources.each_with_index do |source, source_index| %>
+        <% source_id = source[:id].to_i %>
+        <div class="rsw-transition-row <%= source_index.odd? ? 'rsw-even-row' : 'rsw-odd-row' %>">
+          <% @rsw_destinations.each do |destination| %>
+            <% destination_id = destination[:id].to_i %>
+            <div class="rsw-transition-cell <%= 'rsw-enabled' if source_id > 0 && source_id == destination_id %>">
+              <% if source_id > 0 && source_id == destination_id %>
+                <%= check_box_tag "rsw_self_#{source_id}_#{rule}", '1', true, name: nil, disabled: true %>
+              <% elsif source_id == 0 && rule != 'always' %>
+                <span class="rsw-not-applicable">—</span>
+              <% else %>
+                <% state = @rsw_transition_states.fetch([source_id, destination_id, rule], '0').to_s %>
+                <%= hidden_field_tag "transitions[#{source_id}][#{destination_id}][#{rule}]", state,
+                      id: nil, class: 'rsw-transition-value' %>
+                <%= check_box_tag "rsw_transition_#{source_id}_#{destination_id}_#{rule}", '1', state == '1',
+                      name: nil,
+                      class: 'rsw-transition-checkbox',
+                      data: {state: state, source_id: source_id, destination_id: destination_id, rule: rule},
+                      title: (state == 'no_change' ? l(:label_no_change_option) : nil) %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+h1. Redmine Scalable Workflows
+
+Redmine Scalable Workflows replaces the full transition matrix with a progressive, sparse editor for installations that have many issue statuses.
+
+h2. Features
+
+* Searchable, multi-select roles and trackers
+* On-demand issue-status search
+* Compact matrix containing only selected statuses
+* Tri-state checkboxes for mixed multi-scope values
+* Bulk toggle by source row or destination column
+* Support for standard, author-only and assignee-only transitions
+* Partial updates that preserve untouched transitions
+* Targeted reads and writes for selected status pairs
+* No migrations and no Redmine core-file modifications
+
+h2. Requirements
+
+* Redmine 6.0 or newer
+* Structurally validated against Redmine 6.0.6
+
+h2. Installation
+
+# Copy the plugin to @REDMINE_ROOT/plugins/redmine_scalable_workflows@.
+# Restart Redmine.
+# Open *Administration → Workflow*.
+
+Removing the plugin restores the native editor without deleting saved workflow transitions.
+
+h2. Testing status
+
+Automated tests are not yet included. Validate selection, mixed states, saving and removal in a staging Redmine before production deployment.
+
+h2. License
+
+GPL-2.0-or-later.
+
+h2. Author
+
+Roger Gama

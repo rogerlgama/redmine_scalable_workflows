@@ -1,0 +1,103 @@
+<%= render partial: 'workflows/action_menu' %>
+
+<%= title l(:label_workflow) %>
+
+<div class="tabs">
+  <ul>
+    <li><%= link_to l(:label_status_transitions), edit_workflows_path(role_id: @roles, tracker_id: @trackers), class: 'selected' %></li>
+    <li><%= link_to l(:label_fields_permissions), permissions_workflows_path(role_id: @roles, tracker_id: @trackers) %></li>
+  </ul>
+</div>
+
+<p><%= l(:rsw_intro_sparse) %></p>
+
+<%= form_tag edit_workflows_path, method: :get, id: 'rsw-selection-form' do %>
+  <div class="rsw-filter-grid">
+    <div class="rsw-filter-item">
+      <label><%= l(:label_role) %>:</label>
+      <div class="rsw-multiselect" data-param-name="role_id[]" data-placeholder="<%= l(:rsw_search_role) %>" data-selected-label="<%= l(:rsw_selected_count) %>">
+        <button type="button" class="rsw-multiselect-toggle"><span class="rsw-multiselect-summary"></span><span class="rsw-caret">▾</span></button>
+        <div class="rsw-multiselect-panel" hidden>
+          <input type="search" class="rsw-multiselect-search" placeholder="<%= l(:rsw_search_and_select_roles) %>" autocomplete="off">
+          <div class="rsw-multiselect-options"></div>
+        </div>
+        <div class="rsw-multiselect-values">
+          <% Array.wrap(@rsw_selected_roles).each do |role| %>
+            <%= hidden_field_tag 'role_id[]', role[:id], id: nil, class: 'rsw-multiselect-value', data: {label: role[:name]} %>
+          <% end %>
+        </div>
+        <script type="application/json" class="rsw-picker-data"><%= raw json_escape(@rsw_role_options.to_json) %></script>
+      </div>
+    </div>
+
+    <div class="rsw-filter-item">
+      <label><%= l(:label_tracker) %>:</label>
+      <div class="rsw-multiselect" data-param-name="tracker_id[]" data-placeholder="<%= l(:rsw_search_tracker) %>" data-selected-label="<%= l(:rsw_selected_count) %>">
+        <button type="button" class="rsw-multiselect-toggle"><span class="rsw-multiselect-summary"></span><span class="rsw-caret">▾</span></button>
+        <div class="rsw-multiselect-panel" hidden>
+          <input type="search" class="rsw-multiselect-search" placeholder="<%= l(:rsw_search_and_select_trackers) %>" autocomplete="off">
+          <div class="rsw-multiselect-options"></div>
+        </div>
+        <div class="rsw-multiselect-values">
+          <% Array.wrap(@rsw_selected_trackers).each do |tracker| %>
+            <%= hidden_field_tag 'tracker_id[]', tracker[:id], id: nil, class: 'rsw-multiselect-value', data: {label: tracker[:name]} %>
+          <% end %>
+        </div>
+        <script type="application/json" class="rsw-picker-data"><%= raw json_escape(@rsw_tracker_options.to_json) %></script>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    <%= submit_tag l(:button_edit), name: nil, id: 'rsw-edit-selection' %>
+    <%= link_to l(:button_clear), edit_workflows_path, class: 'button', id: 'rsw-clear-selection' %>
+  </p>
+
+  <% if @roles && @trackers %>
+    <%= hidden_field_tag 'axes_initialized', '1', id: nil %>
+  <% end %>
+<% end %>
+
+<% if @roles && @trackers && @rsw_sources.present? && @rsw_destinations.present? && @rsw_valid_axes %>
+  <%= form_tag workflows_path, method: :patch, id: 'rsw-workflow-form' do %>
+    <%= hidden_field_tag 'scalable_editor', '1' %>
+    <%= Array.wrap(@rsw_selected_trackers).map { |tracker| hidden_field_tag('tracker_id[]', tracker[:id], id: nil) }.join.html_safe %>
+    <%= Array.wrap(@rsw_selected_roles).map { |role| hidden_field_tag('role_id[]', role[:id], id: nil) }.join.html_safe %>
+    <%= @rsw_sources.map { |source| hidden_field_tag('source_status_ids[]', source[:id], id: nil) }.join.html_safe %>
+    <%= @rsw_destinations.map { |destination| hidden_field_tag('destination_status_ids[]', destination[:id], id: nil) }.join.html_safe %>
+
+    <div class="rsw-matrix-frame rsw-standard-matrix">
+      <div class="rsw-matrix-axis-header">
+        <div class="rsw-axis-source"><%= l(:rsw_source_status) %></div>
+        <div class="rsw-axis-destination"><%= l(:rsw_destination_status) %></div>
+      </div>
+      <%= render partial: 'redmine_scalable_workflows/matrix', locals: {rule: 'always'} %>
+    </div>
+
+    <%= render partial: 'redmine_scalable_workflows/status_adders' %>
+
+    <% {
+      'author' => l(:label_additional_workflow_transitions_for_author),
+      'assignee' => l(:label_additional_workflow_transitions_for_assignee)
+    }.each do |rule, title_text| %>
+      <details class="rsw-rule-block">
+        <summary><%= title_text %></summary>
+        <div class="rsw-matrix-frame rsw-rule-content">
+          <div class="rsw-matrix-axis-header">
+            <div class="rsw-axis-source"><%= l(:rsw_source_status) %></div>
+            <div class="rsw-axis-destination"><%= l(:rsw_destination_status) %></div>
+          </div>
+          <%= render partial: 'redmine_scalable_workflows/matrix', locals: {rule: rule} %>
+        </div>
+      </details>
+    <% end %>
+
+    <p class="rsw-save-actions"><%= submit_tag l(:button_save) %></p>
+  <% end %>
+<% elsif @roles && @trackers %>
+  <div class="warning"><%= l(:rsw_add_axes_help) %></div>
+  <%= render partial: 'redmine_scalable_workflows/status_adders' %>
+<% end %>
+
+<%= stylesheet_link_tag 'scalable_workflows', plugin: 'redmine_scalable_workflows' %>
+<%= javascript_include_tag 'scalable_workflows', plugin: 'redmine_scalable_workflows' %>

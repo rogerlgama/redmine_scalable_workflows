@@ -1,0 +1,26 @@
+<div class="rsw-status-adders rsw-status-adders-single">
+  <div class="rsw-remote-picker"
+       data-axis="destination"
+       data-param-name="destination_status_ids[]"
+       data-mirror-param-name="source_status_ids[]"
+       data-url="<%= scalable_statuses_workflows_path %>"
+       data-form-id="rsw-selection-form">
+    <label><%= l(:label_new_statuses_allowed) %></label>
+    <div class="rsw-add-line">
+      <input type="search" class="rsw-picker-search" placeholder="<%= l(:rsw_search_status) %>" autocomplete="off">
+      <button type="button" class="rsw-add-status"><%= l(:rsw_add_status) %></button>
+    </div>
+    <div class="rsw-picker-results" hidden></div>
+    <div class="rsw-picker-chips rsw-picker-values-hidden">
+      <% if @rsw_sources.any? { |source| source[:id].to_i.zero? } %>
+        <%= hidden_field_tag 'source_status_ids[]', 0, id: nil, class: 'rsw-picker-value', form: 'rsw-selection-form' %>
+      <% end %>
+      <% selected_statuses = (@rsw_sources + @rsw_destinations).reject { |status| status[:id].to_i.zero? }.uniq { |status| status[:id].to_i } %>
+      <% selected_statuses.each do |status| %>
+        <span class="rsw-chip" data-id="<%= status[:id] %>"><%= status[:name] %></span>
+        <%= hidden_field_tag 'source_status_ids[]', status[:id], id: nil, class: 'rsw-picker-value', form: 'rsw-selection-form' %>
+        <%= hidden_field_tag 'destination_status_ids[]', status[:id], id: nil, class: 'rsw-picker-value', form: 'rsw-selection-form' %>
+      <% end %>
+    </div>
+  </div>
+</div>
