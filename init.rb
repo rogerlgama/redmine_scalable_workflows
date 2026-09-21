@@ -3,6 +3,7 @@
 Redmine::Plugin.register :redmine_scalable_workflows do
   name 'Fluxo de Trabalho'
   author 'Roger Gama'
+  author_url 'https://github.com/rogerlgama'
   description 'Editor progressivo e otimização de desempenho para fluxos com grande quantidade de situações.'
   version '0.4.14'
   url 'https://github.com/rogerlgama/redmine_scalable_workflows'
